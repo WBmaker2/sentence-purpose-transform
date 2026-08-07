@@ -502,6 +502,28 @@
   margin-bottom: var(--sp-1);
 }
 
+/* ---- 다음 미션 이어가기 카드 ---- */
+.next-mission-card {
+  background: linear-gradient(135deg, var(--coral-soft) 0%, var(--gold-soft) 100%);
+  border: 2px dashed var(--coral);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4) var(--sp-5);
+}
+.next-mission-card__label {
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--coral-deep);
+}
+.next-mission-card__title {
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-top: var(--sp-1);
+  color: var(--ink);
+}
+
 /* ---- 업데이트 내역 모달 ---- */
 .modal-backdrop {
   position: fixed;

@@ -15,6 +15,9 @@ type Props = {
   reason: ReasonAnswer;
   reasonTemplateId: string | null;
   onRestart: () => void;
+  // 다음 미션 이어가기 (사양: 미션 종료 후 자연스러운 흐름)
+  nextMissionTitle?: string;
+  onNextMission?: () => void;
 };
 
 export function ResultCard({
@@ -25,6 +28,8 @@ export function ResultCard({
   reason,
   reasonTemplateId,
   onRestart,
+  nextMissionTitle,
+  onNextMission,
 }: Props) {
   const [copied, setCopied] = useState(false);
   const sentence = built.map((p) => p.text).join(' ');
@@ -140,6 +145,22 @@ export function ResultCard({
           </p>
         </div>
       </div>
+
+      {/* 다음 미션 이어가기 (있을 때 강조) */}
+      {nextMissionTitle && onNextMission && (
+        <div className="next-mission-card" style={{ marginTop: 'var(--sp-5)' }}>
+          <div className="next-mission-card__label">다음 미션</div>
+          <div className="next-mission-card__title">{nextMissionTitle}</div>
+          <button
+            className="btn btn--primary btn--block gi-pulse"
+            onClick={onNextMission}
+            style={{ marginTop: 'var(--sp-3)' }}
+            aria-label={`다음 미션으로 이동: ${nextMissionTitle}`}
+          >
+            다음 미션으로 이동 →
+          </button>
+        </div>
+      )}
 
       <div className="row row--between" style={{ marginTop: 'var(--sp-4)' }}>
         <button className="btn" onClick={onRestart} aria-label="새 미션 시작하기">

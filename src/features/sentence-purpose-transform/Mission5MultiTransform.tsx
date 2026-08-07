@@ -328,6 +328,12 @@ function Mission5FinalCompare({
         />
       </div>
 
+      {/* 모든 미션 완료 축하 (미션 5가 마지막) */}
+      <div className="feedback feedback--ok" style={{ marginTop: 'var(--sp-4)' }} role="status">
+        <span aria-hidden="true">🎊</span>
+        <span>모든 미션을 마쳤어요! 같은 사실을 목적과 독자에 맞게 바꾸는 연습을 다 해보았어요.</span>
+      </div>
+
       <div className="row row--between" style={{ marginTop: 'var(--sp-4)' }}>
         <button className="btn" onClick={onRestart} aria-label="새 미션 시작하기">
           ← 새 미션 하기

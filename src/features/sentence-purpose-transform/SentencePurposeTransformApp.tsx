@@ -72,15 +72,14 @@ function StartScreen({
         </p>
       </section>
 
-      <div className="mission-grid" role="list">
+      <ul className="mission-grid" role="list">
         {MISSIONS.map((m) => {
           const fact = FACT_CASES[m.factCaseId];
           return (
+            <li key={m.id} role="listitem" style={{ listStyle: 'none' }}>
             <button
-              key={m.id}
               className="mission-card"
               onClick={() => onSelect(m)}
-              role="listitem"
               aria-label={`미션 ${m.id}: ${m.title}. ${m.desc}`}
             >
               <span className="mission-card__num">
@@ -103,9 +102,10 @@ function StartScreen({
                 {m.id === 5 && <span className="tag">🔄 네 목적 비교</span>}
               </div>
             </button>
+            </li>
           );
         })}
-      </div>
+      </ul>
       {currentMissionId === null && (
         <p className="muted" style={{ textAlign: 'center', marginTop: 'var(--sp-4)' }}>
           미션 0은 연습용이에요. 먼저 해 보아도 좋아요.
@@ -125,6 +125,11 @@ function ActiveMission({
 }) {
   const factCase = FACT_CASES[state.factCaseId!];
   const mission = MISSIONS.find((m) => m.id === state.missionId)!;
+  // 다음 미션 (마지막 미션이면 undefined)
+  const nextMission =
+    mission.id < MISSIONS.length - 1
+      ? MISSIONS[mission.id + 1]
+      : undefined;
 
   return (
     <>
@@ -218,6 +223,10 @@ function ActiveMission({
           reason={state.reason}
           reasonTemplateId={state.reasonTemplateId}
           onRestart={actions.restart}
+          nextMissionTitle={nextMission?.title}
+          onNextMission={
+            nextMission ? () => actions.selectMission(nextMission) : undefined
+          }
         />
       )}
     </>
