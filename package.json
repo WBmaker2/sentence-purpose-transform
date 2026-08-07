@@ -1,0 +1,23 @@
+{
+  "name": "sentence-purpose-transform",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "문장 목적 변환소 — 초등 5~6학년 국어 교육용 웹앱 (사실 보존 + 목적·독자별 표현 변환)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

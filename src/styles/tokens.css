@@ -1,0 +1,108 @@
+/* =========================================================================
+   문장 목적 변환소 — 디자인 토큰 & 베이스 리셋
+   친근한 에디토리얼 · 따뜻한 크림 · 카드 기반 · 학교 소식 편집실 테마
+   ========================================================================= */
+
+/* ---- 디자인 토큰 ---- */
+:root {
+  /* 배경·표면 */
+  --cream: #faf7f2;
+  --paper: #fffdf8;
+  --paper-shade: #f3ede3;
+  --paper-line: #e4dccd;
+
+  /* 잉크(텍스트) */
+  --ink: #2b3a4a;
+  --ink-soft: #54627a;
+  --ink-faint: #8a93a3;
+
+  /* 역할 색상 — 색상 외에도 라벨·아이콘으로 구분 (접근성) */
+  --coral: #e8745c;        /* 액센트·강조 */
+  --coral-deep: #d45a42;
+  --coral-soft: #fde4dd;
+  --sage: #6b8e7f;         /* 안심·보존 성공 */
+  --sage-soft: #dce8e1;
+  --gold: #e8b547;         /* 주의·핵심 */
+  --gold-soft: #fbeec9;
+  --plum: #7a5c8a;         /* 부탁·공손 */
+  --plum-soft: #ece2f2;
+
+  /* 목적 카드 컬러 */
+  --purpose-inform: #3a7ca5;
+  --purpose-inform-soft: #d9e8f1;
+  --purpose-guide: #6b8e7f;
+  --purpose-guide-soft: #dce8e1;
+  --purpose-persuade: #e8745c;
+  --purpose-persuade-soft: #fde4dd;
+  --purpose-request: #7a5c8a;
+  --purpose-request-soft: #ece2f2;
+
+  /* 상태 */
+  --warn: #c8703a;
+  --warn-soft: #f7e3d0;
+  --danger: #c0492f;
+  --danger-soft: #f6dad3;
+
+  /* 타입 스케일 */
+  --fs-display: clamp(1.9rem, 4vw, 2.6rem);
+  --fs-h1: clamp(1.4rem, 2.6vw, 1.75rem);
+  --fs-h2: clamp(1.15rem, 2vw, 1.35rem);
+  --fs-h3: 1.05rem;
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-tiny: 0.78rem;
+
+  /* 간격 */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+
+  /* 모양·그림자 */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(43, 58, 74, 0.06), 0 1px 3px rgba(43, 58, 74, 0.05);
+  --shadow-md: 0 4px 12px rgba(43, 58, 74, 0.08), 0 2px 4px rgba(43, 58, 74, 0.04);
+  --shadow-lg: 0 12px 32px rgba(43, 58, 74, 0.12), 0 4px 8px rgba(43, 58, 74, 0.06);
+
+  /* 터치 영역 44px (접근성 13절) */
+  --touch: 44px;
+
+  /* 전환 */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur: 220ms;
+
+  /* 폰트 */
+  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* ---- 리셋 ---- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--cream);
+  line-height: 1.6;
+  font-size: 16px;
+  /* 종이 질감 포인트 (편집실 테마) */
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(232, 116, 92, 0.04), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(107, 142, 127, 0.04), transparent 40%);
+  background-attachment: fixed;
+}
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea { font-family: inherit; color: inherit; }
+:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
