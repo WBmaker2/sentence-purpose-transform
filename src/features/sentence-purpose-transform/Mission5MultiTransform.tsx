@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FactCase, Purpose, Audience, SentencePiece } from '../../data/types';
 import type { BuiltPiece, ReasonAnswer, MissionDef } from './useSentenceTransformState';
 import { PURPOSE_CARDS, PURPOSE_LABEL, PURPOSE_ORDER } from '../../data/purposeCards';
@@ -25,6 +25,7 @@ type Props = {
   factCase: FactCase;
   mission: MissionDef;
   onRestart: () => void;
+  onComplete?: () => void;
 };
 
 // 미션 5에서 각 목적에 권장하는 독자
@@ -35,7 +36,7 @@ const SUGGESTED_AUDIENCE: Record<Purpose, Audience> = {
   request: 'friend',
 };
 
-export function Mission5MultiTransform({ factCase, mission, onRestart }: Props) {
+export function Mission5MultiTransform({ factCase, mission, onRestart, onComplete }: Props) {
   const purposeOrder = (mission.purposeOrder ?? PURPOSE_ORDER) as Purpose[];
   const [purposeIndex, setPurposeIndex] = useState(0);
   const [results, setResults] = useState<SavedResult[]>([]);
@@ -49,6 +50,13 @@ export function Mission5MultiTransform({ factCase, mission, onRestart }: Props) 
   const [phase, setPhase] = useState<'transform' | 'final'>('transform');
   const [bestPick, setBestPick] = useState<number | null>(null);
   const [bestReason, setBestReason] = useState('');
+
+  // 최종 비교 화면에 도달하면 미션 5 완료로 기록
+  useEffect(() => {
+    if (phase === 'final' && onComplete) {
+      onComplete();
+    }
+  }, [phase, onComplete]);
 
   const currentPurpose = purposeOrder[purposeIndex];
   const currentAudience = SUGGESTED_AUDIENCE[currentPurpose];

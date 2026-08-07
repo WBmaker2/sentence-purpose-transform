@@ -53,6 +53,8 @@ type State = {
   // 근거·결과
   reason: ReasonAnswer;
   reasonTemplateId: string | null;
+  // 완료한 미션 ID 목록 (RESTART 시에도 유지 — 진행도 표시용)
+  completedMissionIds: MissionId[];
 };
 
 type Action =
@@ -75,7 +77,8 @@ type Action =
   | { type: 'SAVE_MULTI_RESULT'; result: { purpose: Purpose; audience: Audience; sentence: string } }
   | { type: 'ADVANCE_MULTI' }
   | { type: 'RESTART' }
-  | { type: 'RESET_BUILT_KEEP_CONTEXT' };
+  | { type: 'RESET_BUILT_KEEP_CONTEXT' }
+  | { type: 'COMPLETE_MISSION'; missionId: MissionId };
 
 const initialState: State = {
   missionId: null,
@@ -98,6 +101,7 @@ const initialState: State = {
     evidence: '',
   },
   reasonTemplateId: null,
+  completedMissionIds: [],
 };
 
 function reducer(state: State, action: Action): State {
@@ -106,6 +110,8 @@ function reducer(state: State, action: Action): State {
       const m = action.mission;
       return {
         ...initialState,
+        // 완료한 미션 기록은 미션 전환 시에도 유지 (진행도 표시용)
+        completedMissionIds: state.completedMissionIds,
         missionId: m.id,
         step: 'factVault',
         factCaseId: m.factCaseId,
@@ -179,8 +185,17 @@ function reducer(state: State, action: Action): State {
       return { ...state, multiPurposeIndex: state.multiPurposeIndex + 1 };
     case 'RESET_BUILT_KEEP_CONTEXT':
       return { ...state, built: [], history: [] };
+    case 'COMPLETE_MISSION': {
+      // 중복 없이 완료 미션 ID 추가
+      if (state.completedMissionIds.includes(action.missionId)) return state;
+      return {
+        ...state,
+        completedMissionIds: [...state.completedMissionIds, action.missionId],
+      };
+    }
     case 'RESTART':
-      return { ...initialState };
+      // 시작 화면으로 돌아가도 완료한 미션 기록은 유지
+      return { ...initialState, completedMissionIds: state.completedMissionIds };
     default:
       return state;
   }
@@ -213,6 +228,10 @@ export function useSentenceTransformState() {
   const advanceMulti = useCallback(() => dispatch({ type: 'ADVANCE_MULTI' }), []);
   const resetBuiltKeepContext = useCallback(() => dispatch({ type: 'RESET_BUILT_KEEP_CONTEXT' }), []);
   const restart = useCallback(() => dispatch({ type: 'RESTART' }), []);
+  const completeMission = useCallback(
+    (missionId: MissionId) => dispatch({ type: 'COMPLETE_MISSION', missionId }),
+    []
+  );
 
   return {
     state,
@@ -237,6 +256,7 @@ export function useSentenceTransformState() {
       advanceMulti,
       resetBuiltKeepContext,
       restart,
+      completeMission,
     },
   };
 }

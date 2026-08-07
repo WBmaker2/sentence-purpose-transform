@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useSentenceTransformState } from './useSentenceTransformState';
 import { MISSIONS } from './missions';
 import { PURPOSE_CARDS, PURPOSE_LABEL } from '../../data/purposeCards';
@@ -37,6 +38,7 @@ export function SentencePurposeTransformApp() {
         <StartScreen
           onSelect={actions.selectMission}
           currentMissionId={state.missionId}
+          completedMissionIds={state.completedMissionIds}
         />
       )}
 
@@ -56,10 +58,13 @@ export function SentencePurposeTransformApp() {
 function StartScreen({
   onSelect,
   currentMissionId,
+  completedMissionIds,
 }: {
   onSelect: (m: (typeof MISSIONS)[number]) => void;
   currentMissionId: number | null;
+  completedMissionIds: number[];
 }) {
+  const completedCount = completedMissionIds.length;
   return (
     <>
       <section className="panel">
@@ -70,20 +75,30 @@ function StartScreen({
           시간·장소·수량 같은 <strong>사실은 그대로</strong> 두고,{' '}
           <strong>표현만 바꾸는</strong> 연습이에요.
         </p>
+        {completedCount > 0 && (
+          <div className="feedback feedback--ok" style={{ marginTop: 'var(--sp-3)' }} role="status">
+            <span aria-hidden="true">🌟</span>
+            <span>지금까지 <strong>{completedCount}개</strong> 미션을 완료했어요! 계속 해볼까요?</span>
+          </div>
+        )}
       </section>
 
       <ul className="mission-grid" role="list">
         {MISSIONS.map((m) => {
           const fact = FACT_CASES[m.factCaseId];
+          const done = completedMissionIds.includes(m.id);
           return (
             <li key={m.id} role="listitem" style={{ listStyle: 'none' }}>
             <button
-              className="mission-card"
+              className={`mission-card ${done ? 'mission-card--done' : ''}`}
               onClick={() => onSelect(m)}
-              aria-label={`미션 ${m.id}: ${m.title}. ${m.desc}`}
+              aria-label={`미션 ${m.id}: ${m.title}. ${m.desc}${done ? '. 완료한 미션입니다.' : ''}`}
             >
+              {done && (
+                <span className="mission-card__badge" aria-hidden="true">✓ 완료</span>
+              )}
               <span className="mission-card__num">
-                {m.id === 0 ? '0' : m.id}
+                {done ? '✓' : m.id === 0 ? '0' : m.id}
               </span>
               <div className="mission-card__title">{m.title}</div>
               <div className="mission-card__desc">{m.desc}</div>
@@ -131,6 +146,13 @@ function ActiveMission({
       ? MISSIONS[mission.id + 1]
       : undefined;
 
+  // 결과 단계에 도달하면 미션을 완료로 기록 (진행도 표시용)
+  useEffect(() => {
+    if (state.step === 'result') {
+      actions.completeMission(mission.id);
+    }
+  }, [state.step, mission.id, actions]);
+
   return (
     <>
       <div className="row row--between" style={{ marginBottom: 'var(--sp-3)' }}>
@@ -157,6 +179,7 @@ function ActiveMission({
           factCase={factCase}
           mission={mission}
           onRestart={actions.restart}
+          onComplete={() => actions.completeMission(mission.id)}
         />
       )}
 
