@@ -63,7 +63,7 @@ type Action =
   | { type: 'TOGGLE_LOCK_FACT'; factId: string }
   | { type: 'CONFIRM_FACT_VAULT' }
   | { type: 'SET_PURPOSE'; purpose: Purpose }
-  | { type: 'SET_AUDIENCE'; audience: Audience }
+  | { type: 'SET_AUDIENCE'; audience: Audience | null }
   | { type: 'CONFIRM_SITUATION' }
   | { type: 'ADD_PIECE'; piece: SentencePiece }
   | { type: 'REMOVE_PIECE'; uid: string }
@@ -209,7 +209,7 @@ export function useSentenceTransformState() {
   const toggleLockFact = useCallback((factId: string) => dispatch({ type: 'TOGGLE_LOCK_FACT', factId }), []);
   const confirmFactVault = useCallback(() => dispatch({ type: 'CONFIRM_FACT_VAULT' }), []);
   const setPurpose = useCallback((purpose: Purpose) => dispatch({ type: 'SET_PURPOSE', purpose }), []);
-  const setAudience = useCallback((audience: Audience) => dispatch({ type: 'SET_AUDIENCE', audience }), []);
+  const setAudience = useCallback((audience: Audience | null) => dispatch({ type: 'SET_AUDIENCE', audience }), []);
   const confirmSituation = useCallback(() => dispatch({ type: 'CONFIRM_SITUATION' }), []);
   const addPiece = useCallback((piece: SentencePiece) => dispatch({ type: 'ADD_PIECE', piece }), []);
   const removePiece = useCallback((uid: string) => dispatch({ type: 'REMOVE_PIECE', uid }), []);

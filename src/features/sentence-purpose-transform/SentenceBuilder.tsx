@@ -53,6 +53,7 @@ export function SentenceBuilder({
   canUndo,
 }: Props) {
   const pieces = getPieceBundle(factCase.id, purpose, audience);
+  const hasBundle = pieces.length > 0;
   const builtSentence = buildSentence(built);
   const usedIds = new Set(built.map((p) => p.id));
 
@@ -168,6 +169,12 @@ export function SentenceBuilder({
             📌 핵심 사실 조각은 그대로 써요. ⚠️ 표시가 있는 조각은 새 정보를 추가하거나 과장하는 조각이에요.
           </p>
           <div className="piece-tray">
+            {!hasBundle && (
+              <div className="feedback feedback--warn" role="status">
+                <span aria-hidden="true">🧩</span>
+                <span>이 목적과 독자 조합의 표현 조각은 아직 준비되지 않았어요. 상황 선택으로 돌아가 다른 조합을 골라 주세요.</span>
+              </div>
+            )}
             {(Object.keys(grouped) as PieceCategory[]).map((cat) => (
               <div key={cat} className="piece-tray__group">
                 <div className="piece-tray__label">{CATEGORY_LABEL[cat]}</div>

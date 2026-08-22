@@ -5,10 +5,12 @@ import react from '@vitejs/plugin-react';
 // GitHub Pages 배포: https://<user>.github.io/sentence-purpose-transform/ 경로에 맞춰 base 설정.
 // 로컬 개발(dev)에서는 base 없이 루트로 동작.
 const isGitHubPages = process.env.GITHUB_ACTIONS === 'true';
+const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')[1];
+const pagesBase = repositoryName ? `/${repositoryName}/` : '/sentence-purpose-transform/';
 
 export default defineConfig({
   plugins: [react()],
-  base: isGitHubPages ? '/sentence-purpose-transform/' : '/',
+  base: isGitHubPages ? pagesBase : '/',
   server: {
     port: 5173,
     open: true,

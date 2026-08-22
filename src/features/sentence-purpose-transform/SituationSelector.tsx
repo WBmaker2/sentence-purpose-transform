@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import type {
   FactCase,
   Purpose,
@@ -5,7 +6,28 @@ import type {
 } from '../../data/types';
 import { PURPOSE_CARDS, PURPOSE_ORDER } from '../../data/purposeCards';
 import { AUDIENCE_CARDS, AUDIENCE_ORDER } from '../../data/audienceCards';
+import { getAvailableAudiences } from '../../data/sentencePieces';
 import type { MissionDef } from './useSentenceTransformState';
+
+function moveRadioChoice<T extends string>(
+  event: KeyboardEvent<HTMLButtonElement>,
+  options: T[],
+  selected: T | null,
+  onSelect: (value: T) => void
+) {
+  if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+    return;
+  }
+  event.preventDefault();
+  if (options.length === 0) return;
+  const currentIndex = selected ? options.indexOf(selected) : 0;
+  const nextIndex = event.key === 'Home'
+    ? 0
+    : event.key === 'End'
+    ? options.length - 1
+    : (currentIndex + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+  onSelect(options[nextIndex]);
+}
 
 // 사양 12.1 상황 선택 화면 — 목적 카드 + 독자 카드
 type Props = {
@@ -13,7 +35,7 @@ type Props = {
   purpose: Purpose | null;
   audience: Audience | null;
   onSelectPurpose: (p: Purpose) => void;
-  onSelectAudience: (a: Audience) => void;
+  onSelectAudience: (a: Audience | null) => void;
   onConfirm: () => void;
   mission: MissionDef;
 };
@@ -30,8 +52,20 @@ export function SituationSelector({
   const hasFixedPurpose = mission.fixedPurpose !== undefined;
   const hasFixedAudience = mission.fixedAudience !== undefined;
   const availablePurposes = factCase.supportedPurposes;
-  const availableAudiences = factCase.supportedAudiences;
+  const availableAudiences = purpose
+    ? getAvailableAudiences(factCase.id, purpose)
+    : factCase.supportedAudiences;
   const bothSelected = purpose !== null && audience !== null;
+
+  const handlePurposeSelect = (nextPurpose: Purpose) => {
+    onSelectPurpose(nextPurpose);
+    if (
+      audience !== null &&
+      !getAvailableAudiences(factCase.id, nextPurpose).includes(audience)
+    ) {
+      onSelectAudience(null);
+    }
+  };
 
   return (
     <section className="panel" aria-labelledby="situation-title">
@@ -55,7 +89,7 @@ export function SituationSelector({
           </p>
         )}
         <div className="choice-grid choice-grid--purpose" role="radiogroup" aria-label="목적 선택">
-          {PURPOSE_ORDER.filter((p) => availablePurposes.includes(p)).map((p) => {
+          {PURPOSE_ORDER.filter((p) => availablePurposes.includes(p)).map((p, index, options) => {
             const meta = PURPOSE_CARDS[p];
             const selected = purpose === p;
             const disabled = hasFixedPurpose && mission.fixedPurpose !== p;
@@ -63,9 +97,11 @@ export function SituationSelector({
               <button
                 key={p}
                 className={`choice-card choice-card--${p} ${selected ? 'choice-card--selected' : ''}`}
-                onClick={() => onSelectPurpose(p)}
+                onClick={() => handlePurposeSelect(p)}
+                onKeyDown={(event) => moveRadioChoice(event, options, purpose, handlePurposeSelect)}
                 role="radio"
                 aria-checked={selected}
+                tabIndex={selected || (!purpose && index === 0) ? 0 : -1}
                 aria-label={`목적 ${meta.name}. ${meta.description}`}
                 disabled={disabled}
                 style={disabled ? { opacity: 0.4 } : undefined}
@@ -101,7 +137,7 @@ export function SituationSelector({
           </p>
         )}
         <div className="choice-grid choice-grid--audience" role="radiogroup" aria-label="독자 선택">
-          {AUDIENCE_ORDER.filter((a) => availableAudiences.includes(a)).map((a) => {
+          {AUDIENCE_ORDER.filter((a) => availableAudiences.includes(a)).map((a, index, options) => {
             const meta = AUDIENCE_CARDS[a];
             const selected = audience === a;
             const disabled = hasFixedAudience && mission.fixedAudience !== a;
@@ -110,8 +146,10 @@ export function SituationSelector({
                 key={a}
                 className={`choice-card ${selected ? 'choice-card--selected' : ''}`}
                 onClick={() => onSelectAudience(a)}
+                onKeyDown={(event) => moveRadioChoice(event, options, audience, (next) => onSelectAudience(next))}
                 role="radio"
                 aria-checked={selected}
+                tabIndex={selected || (!audience && index === 0) ? 0 : -1}
                 aria-label={`독자 ${meta.name}. ${meta.description}`}
                 disabled={disabled}
                 style={disabled ? { opacity: 0.4 } : undefined}

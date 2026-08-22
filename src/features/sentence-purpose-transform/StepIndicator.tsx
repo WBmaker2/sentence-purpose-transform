@@ -19,7 +19,7 @@ export function StepIndicator({ current }: { current: Step }) {
           i < currentIndex ? 'done' : i === currentIndex ? 'active' : '';
         return (
           <span key={s.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <span className={`step step--${status}`}>
+            <span className={`step step--${status}`} aria-current={s.id === current ? 'step' : undefined}>
               <span className="step__dot">{s.n}</span>
               {s.label}
             </span>

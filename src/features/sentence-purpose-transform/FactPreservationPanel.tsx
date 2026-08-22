@@ -6,6 +6,7 @@ import {
 } from '../../lib/factPreservation';
 import { checkPurposeFit } from '../../lib/purposeFit';
 import { checkAudienceFit } from '../../lib/audienceFit';
+import { canProceedAfterCheck } from '../../lib/learningGate';
 import { FEEDBACK_MESSAGES } from '../../data/feedbackRules';
 import { PURPOSE_CARDS } from '../../data/purposeCards';
 import { AUDIENCE_CARDS } from '../../data/audienceCards';
@@ -41,11 +42,18 @@ export function FactPreservationPanel({
   if (preservation.missingRequired.length > 0) feedbackKey = 'missingFact';
   else if (preservation.addedFact || preservation.exaggeration) feedbackKey = 'addedFact';
   else if (!purposeFit.fit) {
-    feedbackKey = purpose === 'persuade' ? 'persuadeLacksReason' : 'purposeMismatch';
+    feedbackKey = 'purposeElementsMissing';
   } else if (purpose === 'request' && audienceFit.mismatch) feedbackKey = 'requestLikeCommand';
   else if (audienceFit.needsMoreDetail) feedbackKey = 'audienceMissing';
+  else if (audienceFit.needsSimplification) feedbackKey = 'audienceTooDetailed';
 
-  const canProceed = preservation.allPreserved;
+  const audienceFits =
+    !audienceFit.needsMoreDetail && !audienceFit.needsSimplification && !audienceFit.mismatch;
+  const canProceed = canProceedAfterCheck(
+    preservation.allPreserved,
+    purposeFit.fit,
+    audienceFits
+  );
 
   return (
     <section className="panel" aria-labelledby="check-title">
@@ -173,13 +181,13 @@ export function FactPreservationPanel({
       </div>
       {!canProceed && (
         <p className="muted" style={{ fontSize: 'var(--fs-small)' }}>
-          필수 사실을 모두 보존하고, 새 사실 추가나 과장을 빼야 다음으로 넘어갈 수 있어요.
-        </p>
-      )}
-      {canProceed && !purposeFit.fit && (
-        <p className="muted" style={{ fontSize: 'var(--fs-small)' }}>
-          사실은 잘 보존했어요. 하지만 아직 {PURPOSE_CARDS[purpose].name}에 필요한 요소가 부족해요.
-          다시 고치기를 눌러 빠진 요소를 채워 보세요. (그래도 다음으로 넘어갈 수 있어요.)
+          {!preservation.allPreserved
+            ? '필수 사실을 모두 보존하고, 새 사실 추가나 과장을 빼야 다음으로 넘어갈 수 있어요.'
+            : !purposeFit.fit
+            ? `${PURPOSE_CARDS[purpose].name}에 필요한 요소(${purposeFit.missing.join(', ')})를 채워야 다음으로 넘어갈 수 있어요.`
+            : !audienceFits
+            ? '사실·목적·독자에 맞는 표현을 모두 확인한 뒤 다음으로 넘어갈 수 있어요.'
+            : ''}
         </p>
       )}
     </section>

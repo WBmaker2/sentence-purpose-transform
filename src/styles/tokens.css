@@ -17,14 +17,14 @@
   --ink-faint: #8a93a3;
 
   /* 역할 색상 — 색상 외에도 라벨·아이콘으로 구분 (접근성) */
-  --coral: #e8745c;        /* 액센트·강조 */
-  --coral-deep: #d45a42;
+  --coral: #b84a36;        /* 액센트·강조 — 흰색 텍스트 대비 확보 */
+  --coral-deep: #963724;
   --coral-soft: #fde4dd;
   --sage: #6b8e7f;         /* 안심·보존 성공 */
   --sage-soft: #dce8e1;
   --gold: #e8b547;         /* 주의·핵심 */
   --gold-soft: #fbeec9;
-  --plum: #7a5c8a;         /* 부탁·공손 */
+  --plum: #6c4a7c;         /* 부탁·공손 */
   --plum-soft: #ece2f2;
 
   /* 목적 카드 컬러 */

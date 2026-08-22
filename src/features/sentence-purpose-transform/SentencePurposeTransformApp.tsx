@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSentenceTransformState } from './useSentenceTransformState';
 import { MISSIONS } from './missions';
 import { PURPOSE_CARDS, PURPOSE_LABEL } from '../../data/purposeCards';
@@ -18,6 +18,7 @@ import { Mission5MultiTransform } from './Mission5MultiTransform';
 export function SentencePurposeTransformApp() {
   const { state, actions } = useSentenceTransformState();
   const changelog = useChangelog();
+  const changelogTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div className="app-shell">
@@ -29,7 +30,7 @@ export function SentencePurposeTransformApp() {
             같은 사실을 목적과 독자에 맞게 바꿔 보아요
           </p>
         </div>
-        <button className="btn btn--small" onClick={changelog.toggle} aria-haspopup="dialog">
+        <button ref={changelogTriggerRef} className="btn btn--small" onClick={changelog.toggle} aria-haspopup="dialog">
           📋 업데이트 내역
         </button>
       </header>
@@ -49,7 +50,7 @@ export function SentencePurposeTransformApp() {
         />
       )}
 
-      <ChangelogModal open={changelog.open} onClose={changelog.close} />
+      <ChangelogModal open={changelog.open} onClose={changelog.close} triggerRef={changelogTriggerRef} />
     </div>
   );
 }
@@ -161,7 +162,7 @@ function ActiveMission({
         </button>
         <span className="tag">미션 {mission.id} · {mission.title}</span>
       </div>
-      <StepIndicator current={state.step} />
+      {mission.id !== 5 && <StepIndicator current={state.step} />}
 
       {state.step === 'factVault' && (
         <FactVault

@@ -87,7 +87,7 @@ export const FACT_CASES: Record<string, FactCase> = {
     factUnits: [
       { id: 'ex-what', label: '무엇', text: '작품 제목표 제출', required: true, kind: 'what' },
       { id: 'ex-when', label: '기한', text: '다음 주 월요일까지', required: true, kind: 'when' },
-      { id: 'ex-who', label: '대상', text: '학급 전시 작품', required: true, kind: 'what' },
+      { id: 'ex-who', label: '대상', text: '학급 전시 작품', required: true, kind: 'target' },
     ],
     acceptableVariants: [
       {

@@ -11,6 +11,7 @@ export type Audience =
 export type FactKind =
   | 'who'
   | 'what'
+  | 'target'
   | 'when'
   | 'where'
   | 'quantity'
@@ -99,9 +100,9 @@ export type PieceBundle = {
 // 피드백 상황 키 (사양 11.1)
 export type FeedbackKey =
   | 'missingFact'
-  | 'purposeMismatch'
+  | 'purposeElementsMissing'
   | 'audienceMissing'
-  | 'persuadeLacksReason'
+  | 'audienceTooDetailed'
   | 'requestLikeCommand'
   | 'addedFact'
   | 'allGood';

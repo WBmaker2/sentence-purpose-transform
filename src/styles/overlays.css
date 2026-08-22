@@ -1,0 +1,54 @@
+/* 문장 목적 변환소 — 업데이트 내역 오버레이 */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 58, 74, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+  z-index: 100;
+  animation: fade-in var(--dur) var(--ease);
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: var(--sp-5);
+}
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+.modal__title { font-size: var(--fs-h2); font-weight: 700; }
+.modal__close {
+  width: var(--touch); height: var(--touch);
+  border-radius: var(--radius-pill);
+  font-size: 1.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal__close:hover { background: var(--paper-shade); }
+.changelog-item {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--paper-line);
+}
+.changelog-item:last-child { border-bottom: none; }
+.changelog-item__date {
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  color: var(--coral);
+  white-space: nowrap;
+  min-width: 84px;
+}

@@ -1,4 +1,4 @@
-import type { PieceBundle, Purpose, Audience, SentencePiece } from './types';
+import type { Purpose, Audience, SentencePiece } from './types';
 
 // 사양 9절 미션에 사용할 표현 조각 묶음.
 // 사실 카드(factCaseId) × 목적(purpose) × 독자(audience) 조합별 조각.
@@ -27,7 +27,12 @@ const BUNDLES: Record<BundleKey, SentencePiece[]> = {
     { id: 'lb-in-title', category: 'title', text: '[우리 학교 도서관 안내]' },
     { id: 'lb-in-core', category: 'coreFact', text: '수요일 오후 5시에', linkedFactIds: ['lb-when'] },
     { id: 'lb-in-core2', category: 'coreFact', text: '도서관 반납함을 비웁니다', linkedFactIds: ['lb-what', 'lb-where'] },
-    { id: 'lb-in-detail', category: 'coreFact', text: '도서관 입구에 있는 반납함이에요' },
+    {
+      id: 'lb-in-detail',
+      category: 'coreFact',
+      text: '도서관 입구에 있는 반납함이에요',
+      isNewFact: true,
+    },
   ],
   'libraryBin-inform-teacher': [
     { id: 'lb-it-core', category: 'coreFact', text: '수요일 오후 5시에', linkedFactIds: ['lb-when'] },
@@ -61,7 +66,12 @@ const BUNDLES: Record<BundleKey, SentencePiece[]> = {
     { id: 'pg-gn-core', category: 'coreFact', text: '금요일까지는', linkedFactIds: ['pg-when'] },
     { id: 'pg-gn-core2', category: 'coreFact', text: '서쪽 운동장을 쓸 수 없어서', linkedFactIds: ['pg-what', 'pg-where'] },
     { id: 'pg-gn-act', category: 'action', text: '동쪽 운동장으로 가 주세요', linkedFactIds: ['pg-alt'] },
-    { id: 'pg-gn-detail', category: 'coreFact', text: '동쪽 운동장은 본관 뒤편이에요' },
+    {
+      id: 'pg-gn-detail',
+      category: 'coreFact',
+      text: '동쪽 운동장은 본관 뒤편이에요',
+      isNewFact: true,
+    },
   ],
   'playground-guide-class': [
     { id: 'pg-gc-core', category: 'coreFact', text: '금요일까지', linkedFactIds: ['pg-when'] },
@@ -76,7 +86,7 @@ const BUNDLES: Record<BundleKey, SentencePiece[]> = {
   ],
   'playground-persuade-class': [
     { id: 'pg-pc-claim', category: 'coreFact', text: '금요일까지는', linkedFactIds: ['pg-when'] },
-    { id: 'pg-pc-core2', category: 'coreFact', text: '서쪽 운동장이 위험해서', linkedFactIds: ['pg-what', 'pg-where'] },
+    { id: 'pg-pc-core2', category: 'coreFact', text: '서쪽 운동장을 사용할 수 없어서', linkedFactIds: ['pg-what', 'pg-where'] },
     { id: 'pg-pc-reason', category: 'reason', text: '안전하게 놀려면' },
     { id: 'pg-pc-act', category: 'action', text: '동쪽 운동장에서 놀아요', linkedFactIds: ['pg-alt'] },
   ],
@@ -104,7 +114,12 @@ const BUNDLES: Record<BundleKey, SentencePiece[]> = {
     { id: 'ex-in-title', category: 'title', text: '[우리 반 전시 안내]' },
     { id: 'ex-in-core', category: 'coreFact', text: '다음 주 월요일까지', linkedFactIds: ['ex-when'] },
     { id: 'ex-in-core2', category: 'coreFact', text: '전시 작품 제목표를 내 주세요', linkedFactIds: ['ex-what', 'ex-who'] },
-    { id: 'ex-in-detail', category: 'coreFact', text: '제목표에는 작품 이름을 적어요' },
+    {
+      id: 'ex-in-detail',
+      category: 'coreFact',
+      text: '제목표에는 작품 이름을 적어요',
+      isNewFact: true,
+    },
   ],
   'exhibit-guide-class': [
     { id: 'ex-gc-core', category: 'coreFact', text: '다음 주 월요일까지', linkedFactIds: ['ex-when'] },
@@ -115,7 +130,12 @@ const BUNDLES: Record<BundleKey, SentencePiece[]> = {
     { id: 'ex-gn-core', category: 'coreFact', text: '다음 주 월요일까지', linkedFactIds: ['ex-when'] },
     { id: 'ex-gn-core2', category: 'coreFact', text: '전시할 작품의 제목표를', linkedFactIds: ['ex-what', 'ex-who'] },
     { id: 'ex-gn-act', category: 'action', text: '작성해서 내 주세요' },
-    { id: 'ex-gn-detail', category: 'coreFact', text: '제목표 양식은 교탁에 있어요' },
+    {
+      id: 'ex-gn-detail',
+      category: 'coreFact',
+      text: '제목표 양식은 교탁에 있어요',
+      isNewFact: true,
+    },
   ],
   'exhibit-persuade-class': [
     { id: 'ex-pc-claim', category: 'coreFact', text: '다음 주 월요일까지', linkedFactIds: ['ex-when'] },
@@ -195,26 +215,21 @@ export function getPieceBundle(
   audience: Audience
 ): SentencePiece[] {
   const key = `${factCaseId}-${purpose}-${audience}` as BundleKey;
-  if (BUNDLES[key]) return BUNDLES[key];
-  // 폴백: 같은 사실+목적의 다른 독자 조각, 그래도 없으면 같은 사실의 아무 조각
-  const samePurposeKeys = Object.keys(BUNDLES).filter(
-    (k) => k.startsWith(`${factCaseId}-${purpose}-`)
-  );
-  if (samePurposeKeys.length > 0) return BUNDLES[samePurposeKeys[0] as BundleKey];
-  const sameFactKeys = Object.keys(BUNDLES).filter((k) =>
-    k.startsWith(`${factCaseId}-`)
-  );
-  return sameFactKeys.length > 0 ? BUNDLES[sameFactKeys[0] as BundleKey] : [];
+  return BUNDLES[key] ?? [];
 }
 
-// 사용하지 않지만 타입 호환성 유지
-export function getCoreFactPieces(_factCaseId: string): SentencePiece[] {
-  return [];
+// 실제로 준비된 조합만 선택 화면에 노출하기 위한 독자 목록
+export function getAvailableAudiences(
+  factCaseId: string,
+  purpose: Purpose
+): Audience[] {
+  const prefix = `${factCaseId}-${purpose}-`;
+  return Object.keys(BUNDLES)
+    .filter((key) => key.startsWith(prefix))
+    .map((key) => key.slice(prefix.length) as Audience);
 }
 
-// PieceBundle 타입 호환용 기본값 (타입 시스템용)
-export const _typeCheck: PieceBundle = {
-  purpose: 'inform',
-  audience: 'friend',
-  pieces: [],
-};
+// 콘텐츠 계약 테스트와 개발 검증에서 모든 조각을 순회할 수 있도록 제공
+export function getAllSentencePieces(): SentencePiece[] {
+  return Object.values(BUNDLES).flat();
+}

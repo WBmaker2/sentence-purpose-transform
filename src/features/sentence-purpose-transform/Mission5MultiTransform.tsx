@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { FactCase, Purpose, Audience, SentencePiece } from '../../data/types';
 import type { BuiltPiece, ReasonAnswer, MissionDef } from './useSentenceTransformState';
 import { PURPOSE_CARDS, PURPOSE_LABEL, PURPOSE_ORDER } from '../../data/purposeCards';
@@ -7,6 +7,7 @@ import { SentenceBuilder } from './SentenceBuilder';
 import { FactPreservationPanel } from './FactPreservationPanel';
 import { EffectComparePanel } from './EffectComparePanel';
 import { checkPreservation } from '../../lib/factPreservation';
+import { canCompleteMission5 } from '../../lib/mission5';
 
 // 사양 9절 미션 5 — 한 사실 네 목적 변환소
 // 학급 전시 사실을 알리기·안내·설득·부탁 네 목적으로 순차 변환하고 비교
@@ -50,13 +51,6 @@ export function Mission5MultiTransform({ factCase, mission, onRestart, onComplet
   const [phase, setPhase] = useState<'transform' | 'final'>('transform');
   const [bestPick, setBestPick] = useState<number | null>(null);
   const [bestReason, setBestReason] = useState('');
-
-  // 최종 비교 화면에 도달하면 미션 5 완료로 기록
-  useEffect(() => {
-    if (phase === 'final' && onComplete) {
-      onComplete();
-    }
-  }, [phase, onComplete]);
 
   const currentPurpose = purposeOrder[purposeIndex];
   const currentAudience = SUGGESTED_AUDIENCE[currentPurpose];
@@ -189,6 +183,7 @@ export function Mission5MultiTransform({ factCase, mission, onRestart, onComplet
       bestReason={bestReason}
       onReasonChange={setBestReason}
       onRestart={onRestart}
+      onComplete={onComplete}
     />
   );
 }
@@ -239,6 +234,7 @@ function Mission5FinalCompare({
   bestReason,
   onReasonChange,
   onRestart,
+  onComplete,
 }: {
   factCase: FactCase;
   results: SavedResult[];
@@ -247,8 +243,11 @@ function Mission5FinalCompare({
   bestReason: string;
   onReasonChange: (s: string) => void;
   onRestart: () => void;
+  onComplete?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const canComplete = canCompleteMission5(bestPick, bestReason);
   const copyText = [
     `【한 사실 네 목적 변환 결과】`,
     `원래 사실: ${factCase.baseSentence}`,
@@ -270,6 +269,12 @@ function Mission5FinalCompare({
     } catch {
       setCopied(false);
     }
+  };
+
+  const handleComplete = () => {
+    if (!canComplete) return;
+    setCompleted(true);
+    onComplete?.();
   };
 
   return (
@@ -336,20 +341,39 @@ function Mission5FinalCompare({
         />
       </div>
 
-      {/* 모든 미션 완료 축하 (미션 5가 마지막) */}
-      <div className="feedback feedback--ok" style={{ marginTop: 'var(--sp-4)' }} role="status">
-        <span aria-hidden="true">🎊</span>
-        <span>모든 미션을 마쳤어요! 같은 사실을 목적과 독자에 맞게 바꾸는 연습을 다 해보았어요.</span>
+      <div className={`feedback ${completed ? 'feedback--ok' : 'feedback--info'}`} style={{ marginTop: 'var(--sp-4)' }} role="status">
+        <span aria-hidden="true">{completed ? '🎊' : '✏️'}</span>
+        <span>
+          {completed
+            ? '모든 미션을 마쳤어요! 같은 사실을 목적과 독자에 맞게 바꾸는 연습을 다 해보았어요.'
+            : '네 변환 중 하나를 고르고, 왜 효과적인지 이유를 적은 뒤 최종 완료를 눌러 보세요.'}
+        </span>
       </div>
 
       <div className="row row--between" style={{ marginTop: 'var(--sp-4)' }}>
         <button className="btn" onClick={onRestart} aria-label="새 미션 시작하기">
           ← 새 미션 하기
         </button>
-        <button className="btn btn--primary" onClick={handleCopy}>
-          {copied ? '✅ 복사됨!' : '📋 결과 복사하기'}
-        </button>
+        <div className="row" style={{ gap: 'var(--sp-2)' }}>
+          <button className="btn" onClick={handleCopy}>
+            {copied ? '✅ 복사됨!' : '📋 결과 복사하기'}
+          </button>
+          <button
+            className={`btn btn--primary ${canComplete && !completed ? 'gi-pulse' : ''}`}
+            onClick={handleComplete}
+            disabled={!canComplete || completed}
+            aria-disabled={!canComplete || completed}
+          >
+            {completed ? '✅ 미션 완료' : '🎓 최종 성찰 완료'}
+          </button>
+        </div>
       </div>
+      {!canComplete && (
+        <p className="muted" style={{ marginTop: 'var(--sp-2)', fontSize: 'var(--fs-small)' }}>
+          {bestPick === null ? '먼저 가장 효과적인 변환을 하나 골라 주세요. ' : ''}
+          {!bestReason.trim() ? '선택한 이유를 한 문장 이상 적어 주세요.' : ''}
+        </p>
+      )}
     </section>
   );
 }

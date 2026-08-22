@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type { FactCase, Purpose, Audience } from '../../data/types';
 import type { BuiltPiece, ReasonAnswer } from './useSentenceTransformState';
 import { PURPOSE_CARDS, PURPOSE_LABEL } from '../../data/purposeCards';
@@ -112,6 +113,9 @@ export function EffectComparePanel({
   ];
 
   const selectedTemplate = templates.find((t) => t.id === reasonTemplateId);
+  const referenceVariant = factCase.acceptableVariants.find(
+    (variant) => variant.purpose === purpose && variant.audience === audience
+  );
   const reasonComplete =
     !!selectedTemplate &&
     selectedTemplate.fields.every((f) => reason[f.key]?.trim());
@@ -170,19 +174,25 @@ export function EffectComparePanel({
         <div className="reason-skeleton">
           {templates.map((t) => {
             const isSelected = reasonTemplateId === t.id;
+            let remainingTemplate = t.template;
             return (
-              <div key={t.id}>
+              <div key={t.id} className={`reason-row ${isSelected ? 'reason-row--selected' : ''}`}>
                 <button
                   type="button"
-                  className={`reason-row ${isSelected ? 'reason-row--selected' : ''}`}
+                  className="reason-select"
                   onClick={() => onSetReasonTemplate(t.id)}
                   aria-pressed={isSelected}
+                  aria-label={`${t.id} 근거 틀 ${isSelected ? '선택됨' : '선택'}`}
                 >
                   <span aria-hidden="true">{isSelected ? '◉' : '◯'}</span>
-                  <span style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-1)', alignItems: 'center' }}>
-                    {t.fields.map((f, i) => (
-                      <span key={f.key} style={{ display: 'inline' }}>
-                        {i === 0 ? t.template.split(`{{${f.key}}}`)[0] : ''}
+                </button>
+                <div className="reason-template">
+                  {t.fields.map((f) => {
+                    const [before, after = ''] = remainingTemplate.split(`{{${f.key}}}`);
+                    remainingTemplate = after;
+                    return (
+                      <Fragment key={f.key}>
+                        <span>{before}</span>
                         <input
                           className="reason-blank"
                           type="text"
@@ -193,11 +203,11 @@ export function EffectComparePanel({
                           style={{ width: `calc(max(${f.example.length}ch, 4ch) + 24px)` }}
                           onFocus={() => onSetReasonTemplate(t.id)}
                         />
-                        {t.template.split(`{{${f.key}}}`)[1]?.split('{{')[0] || ''}
-                      </span>
-                    ))}
-                  </span>
-                </button>
+                      </Fragment>
+                    );
+                  })}
+                  <span>{remainingTemplate}</span>
+                </div>
               </div>
             );
           })}
@@ -208,6 +218,15 @@ export function EffectComparePanel({
           <span aria-hidden="true">📝</span>
           <span>{preview}</span>
         </div>
+        {referenceVariant && (
+          <div className="feedback feedback--info" role="note">
+            <span aria-hidden="true">💡</span>
+            <span>
+              <strong>참고 효과:</strong> {referenceVariant.explanation}{' '}
+              {referenceVariant.effectTags.map((tag) => `#${tag}`).join(' ')}
+            </span>
+          </div>
+        )}
       </div>
 
       <hr className="divider" />

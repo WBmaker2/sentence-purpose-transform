@@ -32,15 +32,14 @@ export function ResultCard({
   onNextMission,
 }: Props) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const sentence = built.map((p) => p.text).join(' ');
   const usedFactIds = collectLinkedFactIds(built);
 
   const preservedRequired = factCase.factUnits.filter(
     (u) => u.required && usedFactIds.includes(u.id)
   );
-  const changedPieces = built.filter(
-    (p) => (p.linkedFactIds?.length ?? 0) === 0 || p.category !== 'coreFact'
-  );
+  const changedPieces = built;
 
   // 복사용 텍스트 조립 (사양 6절: 결과 카드 텍스트 복사만 선택 제공)
   const copyText = [
@@ -56,7 +55,7 @@ export function ResultCard({
     `🔒 보존한 필수 사실:`,
     ...preservedRequired.map((u) => `  · ${kindToKorean(u.kind)}: ${u.text}`),
     ``,
-    `✏️ 바꾼 표현 요소:`,
+    `✏️ 내가 고른 표현 조각:`,
     ...changedPieces.map((p) => `  · ${p.text}`),
   ].join('\n');
 
@@ -64,10 +63,11 @@ export function ResultCard({
     try {
       await navigator.clipboard.writeText(copyText);
       setCopied(true);
+      setCopyError(false);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // 클립보드 미지원 환경 — 화면 인쇄로 안내
       setCopied(false);
+      setCopyError(true);
     }
   };
 
@@ -125,7 +125,7 @@ export function ResultCard({
 
         {/* 바꾼 표현 요소 */}
         <div className="result-section">
-          <div className="result-section__label">✏️ 바꾼 표현 요소</div>
+          <div className="result-section__label">✏️ 내가 고른 표현 조각</div>
           <div className="row" style={{ gap: 'var(--sp-1)' }}>
             {changedPieces.map((p, i) => (
               <span key={p.uid ?? i} className="tag">
@@ -170,6 +170,11 @@ export function ResultCard({
           {copied ? '✅ 복사됨!' : '📋 결과 복사하기'}
         </button>
       </div>
+      {copyError && (
+        <p className="muted" style={{ fontSize: 'var(--fs-small)', textAlign: 'right', marginTop: 'var(--sp-2)' }} role="status">
+          복사하지 못했어요. 결과 문장을 길게 눌러 직접 복사해 보세요.
+        </p>
+      )}
       <p className="muted" style={{ fontSize: 'var(--fs-small)', textAlign: 'center', marginTop: 'var(--sp-2)' }}>
         결과는 저장되지 않고 새로고침하면 사라져요. 필요하면 복사해 두세요.
       </p>
