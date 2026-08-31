@@ -4,7 +4,8 @@ import { MISSIONS } from './missions';
 import { PURPOSE_CARDS, PURPOSE_LABEL } from '../../data/purposeCards';
 import { AUDIENCE_CARDS, AUDIENCE_LABEL } from '../../data/audienceCards';
 import { FACT_CASES } from '../../data/factCases';
-import { ChangelogModal, useChangelog } from './ChangelogModal';
+import { ChangelogModal } from './ChangelogModal';
+import { useChangelog } from './useChangelog';
 import { StepIndicator } from './StepIndicator';
 import { FactVault } from './FactVault';
 import { SituationSelector } from './SituationSelector';
@@ -13,12 +14,29 @@ import { FactPreservationPanel } from './FactPreservationPanel';
 import { EffectComparePanel } from './EffectComparePanel';
 import { ResultCard } from './ResultCard';
 import { Mission5MultiTransform } from './Mission5MultiTransform';
+import { StepFocusRegion } from './StepFocusRegion';
 
 // 사양 12.1 메인 앱 셸 — 단계 라우터, 헤더, 미션 메뉴, gi-pulse 결정 로직
 export function SentencePurposeTransformApp() {
   const { state, actions } = useSentenceTransformState();
   const changelog = useChangelog();
   const changelogTriggerRef = useRef<HTMLButtonElement>(null);
+  const previousStepRef = useRef<typeof state.step | null>(null);
+
+  useEffect(() => {
+    const previousStep = previousStepRef.current;
+
+    if (previousStep !== null && previousStep !== 'start' && state.step === 'start') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      const startHeading = document.getElementById('start-title');
+      if (startHeading) {
+        startHeading.tabIndex = -1;
+        startHeading.focus({ preventScroll: true });
+      }
+    }
+
+    previousStepRef.current = state.step;
+  }, [state.step]);
 
   return (
     <div className="app-shell">
@@ -70,7 +88,7 @@ function StartScreen({
     <>
       <section className="panel">
         <p className="panel__eyebrow">시작하기</p>
-        <h2 className="panel__title">어떤 변환을 해 볼까요?</h2>
+        <h2 id="start-title" className="panel__title">어떤 변환을 해 볼까요?</h2>
         <p className="panel__lead">
           하나의 사실에서 시작해, 목적과 독자에 맞춰 문장을 다시 설계해 보아요.
           시간·장소·수량 같은 <strong>사실은 그대로</strong> 두고,{' '}
@@ -164,95 +182,97 @@ function ActiveMission({
       </div>
       {mission.id !== 5 && <StepIndicator current={state.step} />}
 
-      {state.step === 'factVault' && (
-        <FactVault
-          factCase={factCase}
-          lockedFactIds={state.lockedFactIds}
-          onToggleLock={actions.toggleLockFact}
-          onConfirm={actions.confirmFactVault}
-          isTutorial={mission.id === 0}
-        />
-      )}
+      <StepFocusRegion focusKey={`${mission.id}:${state.step}`}>
+        {state.step === 'factVault' && (
+          <FactVault
+            factCase={factCase}
+            lockedFactIds={state.lockedFactIds}
+            onToggleLock={actions.toggleLockFact}
+            onConfirm={actions.confirmFactVault}
+            isTutorial={mission.id === 0}
+          />
+        )}
 
-      {/* 미션 5: 사실 금고 이후 자체 네 목적 순차 흐름으로 전환 (사양 9절 미션 5) */}
-      {mission.id === 5 && state.step !== 'factVault' && (
-        <Mission5MultiTransform
-          factCase={factCase}
-          mission={mission}
-          onRestart={actions.restart}
-          onComplete={() => actions.completeMission(mission.id)}
-        />
-      )}
+        {/* 미션 5: 사실 금고 이후 자체 네 목적 순차 흐름으로 전환 (사양 9절 미션 5) */}
+        {mission.id === 5 && state.step !== 'factVault' && (
+          <Mission5MultiTransform
+            factCase={factCase}
+            mission={mission}
+            onRestart={actions.restart}
+            onComplete={() => actions.completeMission(mission.id)}
+          />
+        )}
 
-      {state.step === 'situation' && mission.id !== 5 && (
-        <SituationSelector
-          factCase={factCase}
-          purpose={state.purpose}
-          audience={state.audience}
-          onSelectPurpose={actions.setPurpose}
-          onSelectAudience={actions.setAudience}
-          onConfirm={actions.confirmSituation}
-          mission={mission}
-        />
-      )}
+        {state.step === 'situation' && mission.id !== 5 && (
+          <SituationSelector
+            factCase={factCase}
+            purpose={state.purpose}
+            audience={state.audience}
+            onSelectPurpose={actions.setPurpose}
+            onSelectAudience={actions.setAudience}
+            onConfirm={actions.confirmSituation}
+            mission={mission}
+          />
+        )}
 
-      {state.step === 'build' && state.purpose && state.audience && mission.id !== 5 && (
-        <SentenceBuilder
-          factCase={factCase}
-          purpose={state.purpose}
-          audience={state.audience}
-          built={state.built}
-          onAdd={actions.addPiece}
-          onRemove={actions.removePiece}
-          onMove={actions.movePiece}
-          onUndo={actions.undo}
-          onClear={actions.clearBuilt}
-          onCheck={() => actions.goStep('check')}
-          canUndo={state.history.length > 0}
-        />
-      )}
+        {state.step === 'build' && state.purpose && state.audience && mission.id !== 5 && (
+          <SentenceBuilder
+            factCase={factCase}
+            purpose={state.purpose}
+            audience={state.audience}
+            built={state.built}
+            onAdd={actions.addPiece}
+            onRemove={actions.removePiece}
+            onMove={actions.movePiece}
+            onUndo={actions.undo}
+            onClear={actions.clearBuilt}
+            onCheck={() => actions.goStep('check')}
+            canUndo={state.history.length > 0}
+          />
+        )}
 
-      {state.step === 'check' && state.purpose && state.audience && mission.id !== 5 && (
-        <FactPreservationPanel
-          factCase={factCase}
-          purpose={state.purpose}
-          audience={state.audience}
-          built={state.built}
-          onConfirm={actions.confirmPreservation}
-          onBack={() => actions.goStep('build')}
-        />
-      )}
+        {state.step === 'check' && state.purpose && state.audience && mission.id !== 5 && (
+          <FactPreservationPanel
+            factCase={factCase}
+            purpose={state.purpose}
+            audience={state.audience}
+            built={state.built}
+            onConfirm={actions.confirmPreservation}
+            onBack={() => actions.goStep('build')}
+          />
+        )}
 
-      {state.step === 'compare' && state.purpose && state.audience && mission.id !== 5 && (
-        <EffectComparePanel
-          factCase={factCase}
-          purpose={state.purpose}
-          audience={state.audience}
-          built={state.built}
-          reason={state.reason}
-          reasonTemplateId={state.reasonTemplateId}
-          onSetReason={actions.setReason}
-          onSetReasonTemplate={actions.setReasonTemplate}
-          onSubmit={actions.submitResult}
-          onBack={() => actions.goStep('check')}
-        />
-      )}
+        {state.step === 'compare' && state.purpose && state.audience && mission.id !== 5 && (
+          <EffectComparePanel
+            factCase={factCase}
+            purpose={state.purpose}
+            audience={state.audience}
+            built={state.built}
+            reason={state.reason}
+            reasonTemplateId={state.reasonTemplateId}
+            onSetReason={actions.setReason}
+            onSetReasonTemplate={actions.setReasonTemplate}
+            onSubmit={actions.submitResult}
+            onBack={() => actions.goStep('check')}
+          />
+        )}
 
-      {state.step === 'result' && state.purpose && state.audience && mission.id !== 5 && (
-        <ResultCard
-          factCase={factCase}
-          purpose={state.purpose}
-          audience={state.audience}
-          built={state.built}
-          reason={state.reason}
-          reasonTemplateId={state.reasonTemplateId}
-          onRestart={actions.restart}
-          nextMissionTitle={nextMission?.title}
-          onNextMission={
-            nextMission ? () => actions.selectMission(nextMission) : undefined
-          }
-        />
-      )}
+        {state.step === 'result' && state.purpose && state.audience && mission.id !== 5 && (
+          <ResultCard
+            factCase={factCase}
+            purpose={state.purpose}
+            audience={state.audience}
+            built={state.built}
+            reason={state.reason}
+            reasonTemplateId={state.reasonTemplateId}
+            onRestart={actions.restart}
+            nextMissionTitle={nextMission?.title}
+            onNextMission={
+              nextMission ? () => actions.selectMission(nextMission) : undefined
+            }
+          />
+        )}
+      </StepFocusRegion>
     </>
   );
 }

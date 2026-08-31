@@ -1,5 +1,4 @@
 import { useEffect, useRef, type RefObject } from 'react';
-import { useState } from 'react';
 import { CHANGELOG } from './missions';
 
 // 사양 20절 업데이트 내역 모달
@@ -87,11 +86,4 @@ export function ChangelogModal({
       </div>
     </div>
   );
-}
-
-export function useChangelog() {
-  const [open, setOpen] = useState(false);
-  const toggle = () => setOpen((o) => !o);
-  const close = () => setOpen(false);
-  return { open, toggle, close };
 }

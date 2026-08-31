@@ -115,7 +115,7 @@ export function FactVault({
               ).length}개 잠금`}
         </span>
         <button
-          className={`btn btn--primary ${allRequiredLocked ? '' : 'gi-pulse'}`}
+          className={`btn btn--primary ${allRequiredLocked ? 'gi-pulse' : ''}`}
           onClick={onConfirm}
           disabled={!allRequiredLocked}
           aria-disabled={!allRequiredLocked}

@@ -20,13 +20,29 @@ function moveRadioChoice<T extends string>(
   }
   event.preventDefault();
   if (options.length === 0) return;
-  const currentIndex = selected ? options.indexOf(selected) : 0;
+  const group = event.currentTarget.closest('[role="radiogroup"]');
+  const buttons = group
+    ? Array.from(group.querySelectorAll<HTMLButtonElement>('button[data-radio-value]:not(:disabled)'))
+    : [event.currentTarget];
+  const enabledOptions = buttons
+    .map((button) => button.dataset.radioValue as T)
+    .filter((value) => options.includes(value));
+  if (enabledOptions.length === 0) return;
+  const selectedIndex = selected ? enabledOptions.indexOf(selected) : -1;
+  const focusedIndex = enabledOptions.indexOf(event.currentTarget.dataset.radioValue as T);
+  const currentIndex = selectedIndex >= 0
+    ? selectedIndex
+    : focusedIndex >= 0
+    ? focusedIndex
+    : 0;
   const nextIndex = event.key === 'Home'
     ? 0
     : event.key === 'End'
-    ? options.length - 1
-    : (currentIndex + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
-  onSelect(options[nextIndex]);
+    ? enabledOptions.length - 1
+    : (currentIndex + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1) + enabledOptions.length) % enabledOptions.length;
+  const nextValue = enabledOptions[nextIndex];
+  onSelect(nextValue);
+  buttons.find((button) => button.dataset.radioValue === nextValue)?.focus();
 }
 
 // 사양 12.1 상황 선택 화면 — 목적 카드 + 독자 카드
@@ -56,6 +72,12 @@ export function SituationSelector({
     ? getAvailableAudiences(factCase.id, purpose)
     : factCase.supportedAudiences;
   const bothSelected = purpose !== null && audience !== null;
+  const purposeOptions = hasFixedPurpose
+    ? [mission.fixedPurpose as Purpose]
+    : PURPOSE_ORDER.filter((p) => availablePurposes.includes(p));
+  const audienceOptions = hasFixedAudience
+    ? [mission.fixedAudience as Audience]
+    : AUDIENCE_ORDER.filter((a) => availableAudiences.includes(a));
 
   const handlePurposeSelect = (nextPurpose: Purpose) => {
     onSelectPurpose(nextPurpose);
@@ -89,7 +111,7 @@ export function SituationSelector({
           </p>
         )}
         <div className="choice-grid choice-grid--purpose" role="radiogroup" aria-label="목적 선택">
-          {PURPOSE_ORDER.filter((p) => availablePurposes.includes(p)).map((p, index, options) => {
+          {purposeOptions.map((p, index, options) => {
             const meta = PURPOSE_CARDS[p];
             const selected = purpose === p;
             const disabled = hasFixedPurpose && mission.fixedPurpose !== p;
@@ -102,6 +124,7 @@ export function SituationSelector({
                 role="radio"
                 aria-checked={selected}
                 tabIndex={selected || (!purpose && index === 0) ? 0 : -1}
+                data-radio-value={p}
                 aria-label={`목적 ${meta.name}. ${meta.description}`}
                 disabled={disabled}
                 style={disabled ? { opacity: 0.4 } : undefined}
@@ -137,7 +160,7 @@ export function SituationSelector({
           </p>
         )}
         <div className="choice-grid choice-grid--audience" role="radiogroup" aria-label="독자 선택">
-          {AUDIENCE_ORDER.filter((a) => availableAudiences.includes(a)).map((a, index, options) => {
+          {audienceOptions.map((a, index, options) => {
             const meta = AUDIENCE_CARDS[a];
             const selected = audience === a;
             const disabled = hasFixedAudience && mission.fixedAudience !== a;
@@ -150,6 +173,7 @@ export function SituationSelector({
                 role="radio"
                 aria-checked={selected}
                 tabIndex={selected || (!audience && index === 0) ? 0 : -1}
+                data-radio-value={a}
                 aria-label={`독자 ${meta.name}. ${meta.description}`}
                 disabled={disabled}
                 style={disabled ? { opacity: 0.4 } : undefined}
@@ -182,7 +206,7 @@ export function SituationSelector({
             : '목적과 독자를 모두 선택해 주세요.'}
         </span>
         <button
-          className={`btn btn--primary ${bothSelected ? '' : 'gi-pulse'}`}
+          className={`btn btn--primary ${bothSelected ? 'gi-pulse' : ''}`}
           onClick={onConfirm}
           disabled={!bothSelected}
           aria-disabled={!bothSelected}
