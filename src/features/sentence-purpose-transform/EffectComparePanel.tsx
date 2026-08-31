@@ -172,7 +172,7 @@ export function EffectComparePanel({
           근거 틀 하나를 골라 빈칸을 채워요. 자유 입력 대신 틀을 활용해도 좋아요.
         </p>
         <div className="reason-skeleton">
-          {templates.map((t) => {
+          {templates.map((t, index) => {
             const isSelected = reasonTemplateId === t.id;
             let remainingTemplate = t.template;
             return (
@@ -182,7 +182,7 @@ export function EffectComparePanel({
                   className="reason-select"
                   onClick={() => onSetReasonTemplate(t.id)}
                   aria-pressed={isSelected}
-                  aria-label={`${t.id} 근거 틀 ${isSelected ? '선택됨' : '선택'}`}
+                  aria-label={`${index + 1}번째 근거 틀: ${t.template.replace(/\{\{\w+\}\}/g, '빈칸')}${isSelected ? ' 선택됨' : ' 선택'}`}
                 >
                   <span aria-hidden="true">{isSelected ? '◉' : '◯'}</span>
                 </button>
@@ -199,7 +199,7 @@ export function EffectComparePanel({
                           value={reason[f.key] ?? ''}
                           onChange={(e) => onSetReason({ [f.key]: e.target.value })}
                           placeholder={f.example}
-                          aria-label={`${f.label} 빈칸`}
+                          aria-label={`${index + 1}번째 근거 틀의 ${f.label} 빈칸`}
                           style={{ width: `calc(max(${f.example.length}ch, 4ch) + 24px)` }}
                           onFocus={() => onSetReasonTemplate(t.id)}
                         />

@@ -29,6 +29,11 @@
   margin-bottom: var(--sp-5);
   border-bottom: 2px solid var(--paper-line);
 }
+.app-header > .btn { white-space: nowrap; }
+@media (max-width: 359px) {
+  .app-header { flex-direction: column; }
+  .app-header > .btn { align-self: flex-start; }
+}
 .app-title-block { min-width: 0; }
 .app-eyebrow {
   font-size: var(--fs-small);

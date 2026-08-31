@@ -8,6 +8,7 @@ import { FactPreservationPanel } from './FactPreservationPanel';
 import { EffectComparePanel } from './EffectComparePanel';
 import { checkPreservation } from '../../lib/factPreservation';
 import { canCompleteMission5 } from '../../lib/mission5';
+import { StepFocusRegion } from './StepFocusRegion';
 
 // 사양 9절 미션 5 — 한 사실 네 목적 변환소
 // 학급 전시 사실을 알리기·안내·설득·부탁 네 목적으로 순차 변환하고 비교
@@ -114,7 +115,7 @@ export function Mission5MultiTransform({ factCase, mission, onRestart, onComplet
   // 변환 단계
   if (phase === 'transform') {
     return (
-      <>
+      <StepFocusRegion focusKey={`${mission.id}:${phase}:${purposeIndex}:${subState}`}>
         <Mission5Progress
           purposeOrder={purposeOrder}
           currentIndex={purposeIndex}
@@ -169,22 +170,24 @@ export function Mission5MultiTransform({ factCase, mission, onRestart, onComplet
             </div>
           </>
         )}
-      </>
+      </StepFocusRegion>
     );
   }
 
   // 최종 비교 단계 — 네 변환을 나란히 보고 가장 효과적인 것 선택
   return (
-    <Mission5FinalCompare
-      factCase={factCase}
-      results={results}
-      bestPick={bestPick}
-      onPick={setBestPick}
-      bestReason={bestReason}
-      onReasonChange={setBestReason}
-      onRestart={onRestart}
-      onComplete={onComplete}
-    />
+    <StepFocusRegion focusKey={`${mission.id}:${phase}`}>
+      <Mission5FinalCompare
+        factCase={factCase}
+        results={results}
+        bestPick={bestPick}
+        onPick={setBestPick}
+        bestReason={bestReason}
+        onReasonChange={setBestReason}
+        onRestart={onRestart}
+        onComplete={onComplete}
+      />
+    </StepFocusRegion>
   );
 }
 
